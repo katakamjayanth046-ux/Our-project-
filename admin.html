@@ -1,335 +1,201 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avanthi E-Voting - Admin Dashboard</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Avanthi E-Voting - Admin Control Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
 
-    <!-- Header Navigation -->
-    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-blue-600 p-2 rounded-lg text-white font-bold text-xl">AV</div>
+    <!-- Admin Login Modal / Section -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-md w-full shadow-2xl">
+            <h2 class="text-2xl font-bold mb-2 text-blue-400">Admin Authentication</h2>
+            <p class="text-slate-400 text-sm mb-6">Enter admin credentials to access the Avanthi voting control panel.</p>
+            <div class="space-y-4">
                 <div>
-                    <h1 class="font-bold text-lg leading-tight">Avanthi E-Voting</h1>
-                    <p class="text-xs text-slate-400">Administrative Portal (2024-2027)</p>
+                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Username</label>
+                    <input type="text" id="adminUser" value="admin" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500">
                 </div>
-            </div>
-            <div id="adminNavControls" class="hidden flex items-center space-x-4">
-                <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full font-medium">
-                    <i class="fa-solid fa-user-shield mr-1"></i> Authenticated Admin
-                </span>
-                <button onclick="handleLogout()" class="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition font-medium">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
-                </button>
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Password</label>
+                    <input type="password" id="adminPass" placeholder="Enter password (admin123)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <button onclick="handleAdminLogin()" class="w-full bg-blue-600 hover:bg-blue-500 font-semibold py-3 rounded-lg transition">Login to Dashboard</button>
+                <p id="loginError" class="text-red-400 text-xs text-center hidden">Invalid username or password!</p>
             </div>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Content Container -->
-    <main class="flex-grow flex items-center justify-center p-4">
-
-        <!-- 1. ADMIN LOGIN MODAL (Visible by Default) -->
-        <div id="adminLoginModal" class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-2xl">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-blue-600/20 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-3 border border-blue-500/30">
-                    <i class="fa-solid fa-lock text-2xl"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-white">Admin Authentication</h2>
-                <p class="text-sm text-slate-400 mt-1">Authorized Personnel Only</p>
+    <!-- Main Dashboard (Hidden until login) -->
+    <div id="adminDashboard" class="hidden max-w-6xl mx-auto p-4 md:p-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 mb-8 border-b border-slate-800 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-white">Avanthi E-Voting Control Panel</h1>
+                <p class="text-slate-400 text-sm">Manage elections, candidates, manifestos, and live results.</p>
             </div>
+            <button onclick="handleLogout()" class="bg-red-600/20 text-red-400 border border-red-500/30 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600/30 transition">Logout</button>
+        </header>
 
-            <!-- Notification Banner -->
-            <div id="loginAlert" class="hidden mb-4 p-3 rounded-lg text-sm flex items-center gap-2"></div>
-
-            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Username</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500"><i class="fa-solid fa-user"></i></span>
-                        <input type="text" id="adminUser" required placeholder="admin" autocomplete="off"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Add Candidate Form with Photo & Manifesto -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl lg:col-span-1">
+                <h2 class="text-xl font-bold mb-4 text-blue-400">Register Candidate</h2>
+                <form id="candidateForm" onsubmit="saveCandidate(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Candidate Name</label>
+                        <input type="text" id="cName" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
                     </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Password</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500"><i class="fa-solid fa-key"></i></span>
-                        <input type="password" id="adminPass" required placeholder="••••••••" autocomplete="off"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Department / Position</label>
+                        <input type="text" id="cDept" required placeholder="e.g. CSE / President" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
                     </div>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-blue-600/20">
-                    <i class="fa-solid fa-shield-halved mr-2"></i> Unlock Dashboard
-                </button>
-            </form>
-            <div class="mt-4 text-center">
-                <a href="index.html" class="text-xs text-slate-500 hover:text-slate-300 transition">← Return to Public Portal</a>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Manifesto</label>
+                        <textarea id="cManifesto" required rows="3" placeholder="Enter candidate manifesto & agenda..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Candidate Photo (Phone Gallery)</label>
+                        <input type="file" id="cPhotoFile" accept="image/*" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-300 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 font-semibold py-2.5 rounded-lg text-sm transition">Add Candidate</button>
+                </form>
             </div>
-        </div>
 
-        <!-- 2. ELECTION CONDUCT & MANAGEMENT DASHBOARD (Hidden Until Login) -->
-        <div id="adminDashboard" class="hidden w-full max-w-6xl space-y-6">
-            
-            <!-- System Status Banner -->
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <!-- Right Column: Registered Candidates & Live Control -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl lg:col-span-2 flex flex-col justify-between">
                 <div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Election Control Center</span>
-                    <h2 class="text-2xl font-extrabold text-white flex items-center gap-3">
-                        Status: <span id="statusBadge" class="text-lg px-3 py-1 rounded-full">--</span>
-                    </h2>
-                    <p class="text-sm text-slate-400 mt-1">Control live election states and configure official candidate ballots.</p>
-                </div>
-                <div class="flex gap-3">
-                    <button id="toggleElectionBtn" onclick="toggleElectionStatus()" class="px-5 py-3 rounded-xl font-bold transition flex items-center gap-2 shadow-lg">
-                        <!-- Dynamic Button State -->
-                    </button>
-                    <button onclick="resetElectionData()" class="bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 px-4 py-3 rounded-xl font-semibold transition flex items-center gap-2">
-                        <i class="fa-solid fa-trash-arrow-up"></i> Reset All Data
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Add Candidate Panel -->
-                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 h-fit">
-                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-user-plus text-blue-500"></i> Register New Candidate
-                    </h3>
-                    
-                    <form id="addCandidateForm" onsubmit="handleAddCandidate(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1">Candidate Name</label>
-                            <input type="text" id="candName" required placeholder="e.g. Kishore Kumar" 
-                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1">Party / Affiliation</label>
-                            <input type="text" id="candParty" required placeholder="e.g. Progressive Student Union" 
-                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1">Symbol/Icon (FontAwesome / Emoji)</label>
-                            <input type="text" id="candSymbol" required placeholder="e.g. ⚡ or fa-lightbulb" 
-                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
-                        </div>
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl transition">
-                            <i class="fa-solid fa-plus mr-1"></i> Add Candidate to Ballot
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Active Candidate Ballot List -->
-                <div class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-2xl p-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-list-check text-blue-500"></i> Official Ballot Candidates
-                        </h3>
-                        <span class="text-xs text-slate-400">NOTA is enforced by default</span>
+                        <h2 class="text-xl font-bold text-blue-400">Registered Candidates List</h2>
+                        <button onclick="clearAllData()" class="text-xs bg-red-600/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded hover:bg-red-600/30">Reset All Data</button>
                     </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-slate-300">
-                            <thead class="bg-slate-900 text-xs uppercase text-slate-400">
-                                <tr>
-                                    <th class="p-3 rounded-l-lg">Symbol</th>
-                                    <th class="p-3">Candidate</th>
-                                    <th class="p-3">Party</th>
-                                    <th class="p-3 text-center">Action</th>
+                    <div class="overflow-x-auto max-h-[400px] overflow-y-auto pr-1">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-xs uppercase text-slate-400">
+                                    <th class="py-3 px-2">Photo</th>
+                                    <th class="py-3 px-2">Name</th>
+                                    <th class="py-3 px-2">Dept / Role</th>
+                                    <th class="py-3 px-2">Manifesto</th>
+                                    <th class="py-3 px-2 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="candidateTableBody" class="divide-y divide-slate-700">
-                                <!-- Dynamic Rows -->
+                            <tbody id="candidatesTableBody" class="divide-y divide-slate-800 text-sm">
+                                <!-- Populated dynamically -->
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-
-            <!-- Navigation Shortcuts -->
-            <div class="flex justify-between items-center bg-slate-800 border border-slate-700 rounded-xl p-4">
-                <span class="text-xs text-slate-400">Quick Links:</span>
-                <div class="flex gap-4">
-                    <a href="voting.html" class="text-sm text-blue-400 hover:underline"><i class="fa-solid fa-check-to-slot mr-1"></i> Test Voting Page</a>
-                    <a href="results.html" class="text-sm text-blue-400 hover:underline"><i class="fa-solid fa-chart-pie mr-1"></i> Live Analytics</a>
+                <div class="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center">
+                    <span class="text-xs text-slate-400">Avanthi E-Voting System &bull; Secured Local Storage</span>
+                    <a href="voting.html" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition">Preview Voting Page &rarr;</a>
                 </div>
             </div>
-
         </div>
+    </div>
 
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-slate-800 border-t border-slate-700 py-3 text-center text-xs text-slate-500">
-        Guided by Mrs. K. JYOTHI | Avanthi Institute Final Year Diploma Project (2024-2027)
-    </footer>
-
-    <!-- Script Execution -->
     <script>
-        // State Initialization
-        const DEFAULT_CREDENTIALS = { user: "admin", pass: "admin123" };
-        const MANDATORY_NOTA = { id: "nota", name: "None Of The Above (NOTA)", party: "Neutral", symbol: "🚫" };
-
-        window.addEventListener("DOMContentLoaded", () => {
-            initializeStorage();
-            checkAdminSession();
-        });
-
-        function initializeStorage() {
-            if (!localStorage.getItem("electionActive")) {
-                localStorage.setItem("electionActive", "false");
+        // Check session on load
+        window.onload = function() {
+            if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+                document.getElementById('adminLoginModal').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                loadCandidates();
             }
-            if (!localStorage.getItem("candidates")) {
-                localStorage.setItem("candidates", JSON.stringify([MANDATORY_NOTA]));
-            }
-        }
+        };
 
-        function checkAdminSession() {
-            const isAuthenticated = sessionStorage.getItem("adminAuthenticated") === "true";
-            const loginModal = document.getElementById("adminLoginModal");
-            const dashboard = document.getElementById("adminDashboard");
-            const navControls = document.getElementById("adminNavControls");
-
-            if (isAuthenticated) {
-                loginModal.classList.add("hidden");
-                dashboard.classList.remove("hidden");
-                navControls.classList.remove("hidden");
-                renderDashboard();
+        function handleAdminLogin() {
+            const user = document.getElementById('adminUser').value.trim();
+            const pass = document.getElementById('adminPass').value.trim();
+            if (user === 'admin' && pass === 'admin123') {
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                document.getElementById('adminLoginModal').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                loadCandidates();
             } else {
-                loginModal.classList.remove("hidden");
-                dashboard.classList.add("hidden");
-                navControls.classList.add("hidden");
-            }
-        }
-
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const uInput = document.getElementById("adminUser").value.trim();
-            const pInput = document.getElementById("adminPass").value.trim();
-            const alertBox = document.getElementById("loginAlert");
-
-            if (uInput === DEFAULT_CREDENTIALS.user && pInput === DEFAULT_CREDENTIALS.pass) {
-                sessionStorage.setItem("adminAuthenticated", "true");
-                showAlert(alertBox, "Authentication successful! Opening dashboard...", "emerald");
-                setTimeout(() => {
-                    checkAdminSession();
-                }, 600);
-            } else {
-                showAlert(alertBox, "Invalid credentials! Check username or password.", "red");
+                document.getElementById('loginError').classList.remove('hidden');
             }
         }
 
         function handleLogout() {
-            sessionStorage.removeItem("adminAuthenticated");
-            checkAdminSession();
+            sessionStorage.removeItem('adminLoggedIn');
+            location.reload();
         }
 
-        function showAlert(element, message, color) {
-            element.className = `mb-4 p-3 rounded-lg text-sm flex items-center gap-2 bg-${color}-500/10 text-${color}-400 border border-${color}-500/20`;
-            element.innerHTML = `<i class="fa-solid fa-circle-info"></i> ${message}`;
-            element.classList.remove("hidden");
-        }
+        function saveCandidate(event) {
+            event.preventDefault();
+            const name = document.getElementById('cName').value.trim();
+            const dept = document.getElementById('cDept').value.trim();
+            const manifesto = document.getElementById('cManifesto').value.trim();
+            const fileInput = document.getElementById('cPhotoFile');
 
-        function renderDashboard() {
-            // Render Election Status Badge & Toggle Button
-            const isActive = localStorage.getItem("electionActive") === "true";
-            const statusBadge = document.getElementById("statusBadge");
-            const toggleBtn = document.getElementById("toggleElectionBtn");
-
-            if (isActive) {
-                statusBadge.textContent = "LIVE / ACTIVE";
-                statusBadge.className = "text-sm px-3 py-1 rounded-full font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
-                
-                toggleBtn.className = "bg-amber-600 hover:bg-amber-700 text-white px-5 py-3 rounded-xl font-bold transition flex items-center gap-2 shadow-lg shadow-amber-600/20";
-                toggleBtn.innerHTML = `<i class="fa-solid fa-pause"></i> Pause / End Election`;
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoBase64 = e.target.result;
+                    storeCandidateData(name, dept, manifesto, photoBase64);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
             } else {
-                statusBadge.textContent = "CLOSED / INACTIVE";
-                statusBadge.className = "text-sm px-3 py-1 rounded-full font-bold bg-red-500/10 text-red-400 border border-red-500/30";
-                
-                toggleBtn.className = "bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-600/20";
-                toggleBtn.innerHTML = `<i class="fa-solid fa-play"></i> Launch Election`;
+                // Default avatar if no photo uploaded
+                storeCandidateData(name, dept, manifesto, 'https://via.placeholder.com/150?text=No+Photo');
+            }
+        }
+
+        function storeCandidateData(name, dept, manifesto, photo) {
+            let candidates = JSON.parse(localStorage.getItem('avanthi_candidates')) || [];
+            candidates.push({
+                id: Date.now(),
+                name: name,
+                dept: dept,
+                manifesto: manifesto,
+                photo: photo,
+                votes: 0
+            });
+            localStorage.setItem('avanthi_candidates', JSON.stringify(candidates));
+            document.getElementById('candidateForm').reset();
+            loadCandidates();
+        }
+
+        function loadCandidates() {
+            const tbody = document.getElementById('candidatesTableBody');
+            let candidates = JSON.parse(localStorage.getItem('avanthi_candidates')) || [];
+            
+            if (candidates.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 text-xs">No candidates registered yet.</td></tr>`;
+                return;
             }
 
-            // Render Candidate Table
-            const candidates = JSON.parse(localStorage.getItem("candidates")) || [MANDATORY_NOTA];
-            const tableBody = document.getElementById("candidateTableBody");
-            tableBody.innerHTML = "";
-
-            candidates.forEach((cand, index) => {
-                const tr = document.createElement("tr");
-                tr.className = "hover:bg-slate-700/50 transition";
-
-                const isNota = cand.id === "nota";
-
-                tr.innerHTML = `
-                    <td class="p-3 font-bold text-lg">${cand.symbol}</td>
-                    <td class="p-3 font-semibold text-white">${cand.name}</td>
-                    <td class="p-3">${cand.party}</td>
-                    <td class="p-3 text-center">
-                        ${isNota 
-                            ? `<span class="text-xs bg-slate-700 text-slate-400 px-2 py-1 rounded">Default System Choice</span>` 
-                            : `<button onclick="deleteCandidate('${cand.id}')" class="text-red-400 hover:text-red-300 p-1.5 transition" title="Delete Candidate">
-                                <i class="fa-solid fa-trash"></i>
-                               </button>`
-                        }
+            tbody.innerHTML = candidates.map(c => `
+                <tr class="hover:bg-slate-800/50">
+                    <td class="py-3 px-2">
+                        <img src="${c.photo}" alt="Candidate" class="w-10 h-10 rounded-full object-cover border border-slate-700">
                     </td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        }
-
-        function toggleElectionStatus() {
-            const currentStatus = localStorage.getItem("electionActive") === "true";
-            const newStatus = !currentStatus;
-            localStorage.setItem("electionActive", newStatus.toString());
-            renderDashboard();
-        }
-
-        function handleAddCandidate(e) {
-            e.preventDefault();
-            const name = document.getElementById("candName").value.trim();
-            const party = document.getElementById("candParty").value.trim();
-            const symbol = document.getElementById("candSymbol").value.trim();
-
-            let candidates = JSON.parse(localStorage.getItem("candidates")) || [MANDATORY_NOTA];
-
-            const newCand = {
-                id: "cand_" + Date.now(),
-                name: name,
-                party: party,
-                symbol: symbol
-            };
-
-            candidates.push(newCand);
-            localStorage.setItem("candidates", JSON.stringify(candidates));
-
-            document.getElementById("addCandidateForm").reset();
-            renderDashboard();
+                    <td class="py-3 px-2 font-medium text-white">${c.name}</td>
+                    <td class="py-3 px-2 text-slate-300">${c.dept}</td>
+                    <td class="py-3 px-2 text-slate-400 max-w-xs truncate">${c.manifesto}</td>
+                    <td class="py-3 px-2 text-right">
+                        <button onclick="deleteCandidate(${c.id})" class="text-red-400 hover:text-red-300 text-xs bg-red-500/10 px-2 py-1 rounded">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
         function deleteCandidate(id) {
-            let candidates = JSON.parse(localStorage.getItem("candidates")) || [MANDATORY_NOTA];
+            let candidates = JSON.parse(localStorage.getItem('avanthi_candidates')) || [];
             candidates = candidates.filter(c => c.id !== id);
-            localStorage.setItem("candidates", JSON.stringify(candidates));
-            renderDashboard();
+            localStorage.setItem('avanthi_candidates', JSON.stringify(candidates));
+            loadCandidates();
         }
 
-        function resetElectionData() {
-            if (confirm("Are you sure you want to reset all election parameters? This will restore NOTA default and pause the election.")) {
-                localStorage.setItem("electionActive", "false");
-                localStorage.setItem("candidates", JSON.stringify([MANDATORY_NOTA]));
-                localStorage.removeItem("votes");
-                renderDashboard();
+        function clearAllData() {
+            if (confirm('Are you sure you want to reset all voting and candidate data?')) {
+                localStorage.clear();
+                loadCandidates();
+                alert('All data cleared successfully.');
             }
         }
     </script>
 </body>
 </html>
-```
