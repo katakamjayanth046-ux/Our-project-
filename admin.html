@@ -3,105 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avanthi E-Voting - Admin Control Console</title>
+    <title>Avanthi E-Voting - Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
 
-    <!-- Admin Login Modal / Section -->
-    <div id="adminLoginModal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+    <!-- Admin Authentication Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-md w-full shadow-2xl">
-            <h2 class="text-2xl font-bold mb-2 text-blue-400">Admin Authentication</h2>
-            <p class="text-slate-400 text-sm mb-6">Enter admin credentials to access the Avanthi voting control panel.</p>
+            <h2 class="text-2xl font-bold mb-1 text-blue-400">Admin Login</h2>
+            <p class="text-slate-400 text-sm mb-6">Enter credentials to manage Avanthi E-Voting System.</p>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Username</label>
+                    <label class="block text-xs uppercase text-slate-400 mb-1">Username</label>
                     <input type="text" id="adminUser" value="admin" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Password</label>
-                    <input type="password" id="adminPass" placeholder="Enter password (admin123)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs uppercase text-slate-400 mb-1">Password</label>
+                    <input type="password" id="adminPass" placeholder="Password (admin123)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500">
                 </div>
-                <button onclick="handleAdminLogin()" class="w-full bg-blue-600 hover:bg-blue-500 font-semibold py-3 rounded-lg transition">Login to Dashboard</button>
-                <p id="loginError" class="text-red-400 text-xs text-center hidden">Invalid username or password!</p>
+                <button onclick="handleAdminLogin()" class="w-full bg-blue-600 hover:bg-blue-500 font-semibold py-3 rounded-lg transition">Login</button>
+                <p id="loginError" class="text-red-400 text-xs text-center hidden">Invalid Username or Password!</p>
             </div>
         </div>
     </div>
 
-    <!-- Main Dashboard (Hidden until login) -->
-    <div id="adminDashboard" class="hidden max-w-6xl mx-auto p-4 md:p-8">
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 mb-8 border-b border-slate-800 gap-4">
+    <!-- Main Admin Dashboard -->
+    <div id="adminDashboard" class="hidden max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-slate-800 gap-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-white">Avanthi E-Voting Control Panel</h1>
-                <p class="text-slate-400 text-sm">Manage elections, candidates, manifestos, and live results.</p>
+                <h1 class="text-3xl font-extrabold text-white">Avanthi E-Voting Control Console</h1>
+                <p class="text-slate-400 text-sm">Manage elections, timing, manifestos, candidates & feedback.</p>
             </div>
-            <button onclick="handleLogout()" class="bg-red-600/20 text-red-400 border border-red-500/30 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600/30 transition">Logout</button>
+            <div class="flex gap-3">
+                <a href="results.html" target="_blank" class="bg-blue-600/20 text-blue-400 border border-blue-500/30 px-4 py-2 rounded-lg text-sm hover:bg-blue-600/30">Live Results</a>
+                <button onclick="handleLogout()" class="bg-red-600/20 text-red-400 border border-red-500/30 px-4 py-2 rounded-lg text-sm hover:bg-red-600/30">Logout</button>
+            </div>
         </header>
 
+        <!-- Top Grid: Election Schedule & Global Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Election Timing Controls -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-lg">
+                <h2 class="text-xl font-bold text-blue-400 mb-4">⏱️ Election Timings & Status</h2>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Start Time</label>
+                            <input type="datetime-local" id="startTime" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">End Time</label>
+                            <input type="datetime-local" id="endTime" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-white">
+                        </div>
+                    </div>
+                    <button onclick="saveElectionTime()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-2.5 rounded-lg text-sm font-semibold">Save Schedule</button>
+                    <p id="timeStatus" class="text-xs text-slate-400 text-center"></p>
+                </div>
+            </div>
+
+            <!-- NOTA & General Settings -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-lg flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-blue-400 mb-4">⚙️ Voting Features</h2>
+                    <div class="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl mb-4">
+                        <div>
+                            <p class="font-semibold text-sm">Enable NOTA Option</p>
+                            <p class="text-xs text-slate-400">Allow voters to choose 'None of the Above'</p>
+                        </div>
+                        <input type="checkbox" id="notaToggle" onchange="toggleNota()" class="w-5 h-5 accent-blue-500">
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="clearAllData()" class="w-full bg-red-600/20 border border-red-500/30 text-red-400 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-600/30">Reset All Votes & Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Grid: Register Candidate & Candidate List -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Column: Add Candidate Form with Photo & Manifesto -->
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl lg:col-span-1">
-                <h2 class="text-xl font-bold mb-4 text-blue-400">Register Candidate</h2>
+            
+            <!-- Register Candidate Form -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-lg">
+                <h2 class="text-xl font-bold text-blue-400 mb-4">➕ Add Candidate</h2>
                 <form id="candidateForm" onsubmit="saveCandidate(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Candidate Name</label>
-                        <input type="text" id="cName" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs text-slate-400 mb-1">Candidate Name</label>
+                        <input type="text" id="cName" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                     </div>
                     <div>
-                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Department / Position</label>
-                        <input type="text" id="cDept" required placeholder="e.g. CSE / President" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs text-slate-400 mb-1">Department / Role</label>
+                        <input type="text" id="cDept" placeholder="e.g. CSE - President" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
                     </div>
                     <div>
-                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Manifesto</label>
-                        <textarea id="cManifesto" required rows="3" placeholder="Enter candidate manifesto & agenda..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
+                        <label class="block text-xs text-slate-400 mb-1">Manifesto</label>
+                        <textarea id="cManifesto" rows="3" placeholder="Candidate promises & goals..." required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"></textarea>
                     </div>
                     <div>
-                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Candidate Photo (Phone Gallery)</label>
-                        <input type="file" id="cPhotoFile" accept="image/*" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-300 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500">
+                        <label class="block text-xs text-slate-400 mb-1">Photo (Gallery / Camera File)</label>
+                        <input type="file" id="cPhotoFile" accept="image/*" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-xs text-slate-300 file:bg-blue-600 file:text-white file:border-0 file:px-2 file:py-1 file:rounded">
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 font-semibold py-2.5 rounded-lg text-sm transition">Add Candidate</button>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-2.5 rounded-lg text-sm font-semibold">Save Candidate</button>
                 </form>
             </div>
 
-            <!-- Right Column: Registered Candidates & Live Control -->
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl lg:col-span-2 flex flex-col justify-between">
-                <div>
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-blue-400">Registered Candidates List</h2>
-                        <button onclick="clearAllData()" class="text-xs bg-red-600/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded hover:bg-red-600/30">Reset All Data</button>
-                    </div>
-                    <div class="overflow-x-auto max-h-[400px] overflow-y-auto pr-1">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b border-slate-800 text-xs uppercase text-slate-400">
-                                    <th class="py-3 px-2">Photo</th>
-                                    <th class="py-3 px-2">Name</th>
-                                    <th class="py-3 px-2">Dept / Role</th>
-                                    <th class="py-3 px-2">Manifesto</th>
-                                    <th class="py-3 px-2 text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="candidatesTableBody" class="divide-y divide-slate-800 text-sm">
-                                <!-- Populated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center">
-                    <span class="text-xs text-slate-400">Avanthi E-Voting System &bull; Secured Local Storage</span>
-                    <a href="voting.html" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition">Preview Voting Page &rarr;</a>
+            <!-- Candidates Table -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-lg lg:col-span-2">
+                <h2 class="text-xl font-bold text-blue-400 mb-4">📋 Registered Candidates</h2>
+                <div class="overflow-x-auto max-h-[380px] overflow-y-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="border-b border-slate-800 text-xs text-slate-400 uppercase">
+                            <tr>
+                                <th class="py-2">Photo</th>
+                                <th class="py-2">Name</th>
+                                <th class="py-2">Dept</th>
+                                <th class="py-2">Manifesto</th>
+                                <th class="py-2 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="candidatesTableBody" class="divide-y divide-slate-800">
+                            <!-- Candidates list injected here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+
+        <!-- Bottom Grid: Feedback Section -->
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-lg">
+            <h2 class="text-xl font-bold text-blue-400 mb-4">💬 Student Feedback & Remarks</h2>
+            <div id="feedbackList" class="space-y-3 max-h-60 overflow-y-auto">
+                <!-- Dynamic feedback items -->
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // Check session on load
         window.onload = function() {
             if (sessionStorage.getItem('adminLoggedIn') === 'true') {
                 document.getElementById('adminLoginModal').classList.add('hidden');
                 document.getElementById('adminDashboard').classList.remove('hidden');
-                loadCandidates();
+                loadDashboardData();
             }
         };
 
@@ -112,7 +158,7 @@
                 sessionStorage.setItem('adminLoggedIn', 'true');
                 document.getElementById('adminLoginModal').classList.add('hidden');
                 document.getElementById('adminDashboard').classList.remove('hidden');
-                loadCandidates();
+                loadDashboardData();
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }
@@ -123,8 +169,22 @@
             location.reload();
         }
 
-        function saveCandidate(event) {
-            event.preventDefault();
+        function saveElectionTime() {
+            const start = document.getElementById('startTime').value;
+            const end = document.getElementById('endTime').value;
+            localStorage.setItem('avanthi_start_time', start);
+            localStorage.setItem('avanthi_end_time', end);
+            alert('Election timings updated!');
+            loadDashboardData();
+        }
+
+        function toggleNota() {
+            const isEnabled = document.getElementById('notaToggle').checked;
+            localStorage.setItem('avanthi_nota_enabled', isEnabled);
+        }
+
+        function saveCandidate(e) {
+            e.preventDefault();
             const name = document.getElementById('cName').value.trim();
             const dept = document.getElementById('cDept').value.trim();
             const manifesto = document.getElementById('cManifesto').value.trim();
@@ -132,27 +192,18 @@
 
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const photoBase64 = e.target.result;
-                    storeCandidateData(name, dept, manifesto, photoBase64);
+                reader.onload = function(evt) {
+                    addCandidateRecord(name, dept, manifesto, evt.target.result);
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
-                // Default avatar if no photo uploaded
-                storeCandidateData(name, dept, manifesto, 'https://via.placeholder.com/150?text=No+Photo');
+                addCandidateRecord(name, dept, manifesto, 'https://via.placeholder.com/150?text=Candidate');
             }
         }
 
-        function storeCandidateData(name, dept, manifesto, photo) {
+        function addCandidateRecord(name, dept, manifesto, photo) {
             let candidates = JSON.parse(localStorage.getItem('avanthi_candidates')) || [];
-            candidates.push({
-                id: Date.now(),
-                name: name,
-                dept: dept,
-                manifesto: manifesto,
-                photo: photo,
-                votes: 0
-            });
+            candidates.push({ id: Date.now(), name, dept, manifesto, photo, votes: 0 });
             localStorage.setItem('avanthi_candidates', JSON.stringify(candidates));
             document.getElementById('candidateForm').reset();
             loadCandidates();
@@ -161,23 +212,17 @@
         function loadCandidates() {
             const tbody = document.getElementById('candidatesTableBody');
             let candidates = JSON.parse(localStorage.getItem('avanthi_candidates')) || [];
-            
             if (candidates.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 text-xs">No candidates registered yet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 text-xs">No candidates registered.</td></tr>`;
                 return;
             }
-
             tbody.innerHTML = candidates.map(c => `
-                <tr class="hover:bg-slate-800/50">
-                    <td class="py-3 px-2">
-                        <img src="${c.photo}" alt="Candidate" class="w-10 h-10 rounded-full object-cover border border-slate-700">
-                    </td>
-                    <td class="py-3 px-2 font-medium text-white">${c.name}</td>
-                    <td class="py-3 px-2 text-slate-300">${c.dept}</td>
-                    <td class="py-3 px-2 text-slate-400 max-w-xs truncate">${c.manifesto}</td>
-                    <td class="py-3 px-2 text-right">
-                        <button onclick="deleteCandidate(${c.id})" class="text-red-400 hover:text-red-300 text-xs bg-red-500/10 px-2 py-1 rounded">Delete</button>
-                    </td>
+                <tr>
+                    <td class="py-2"><img src="${c.photo}" class="w-9 h-9 rounded-full object-cover border border-slate-700"></td>
+                    <td class="py-2 font-medium">${c.name}</td>
+                    <td class="py-2 text-slate-300">${c.dept}</td>
+                    <td class="py-2 text-slate-400 max-w-xs truncate">${c.manifesto}</td>
+                    <td class="py-2 text-right"><button onclick="deleteCandidate(${c.id})" class="text-red-400 hover:text-red-300 text-xs bg-red-500/10 px-2 py-1 rounded">Delete</button></td>
                 </tr>
             `).join('');
         }
@@ -189,11 +234,37 @@
             loadCandidates();
         }
 
+        function loadDashboardData() {
+            loadCandidates();
+            
+            // Timings
+            document.getElementById('startTime').value = localStorage.getItem('avanthi_start_time') || '';
+            document.getElementById('endTime').value = localStorage.getItem('avanthi_end_time') || '';
+            
+            // NOTA
+            const nota = localStorage.getItem('avanthi_nota_enabled') === 'true';
+            document.getElementById('notaToggle').checked = nota;
+
+            // Feedbacks
+            const feedbacks = JSON.parse(localStorage.getItem('avanthi_feedbacks')) || [];
+            const fbBox = document.getElementById('feedbackList');
+            if(feedbacks.length === 0) {
+                fbBox.innerHTML = `<p class="text-xs text-slate-500">No student feedback submitted yet.</p>`;
+            } else {
+                fbBox.innerHTML = feedbacks.map(f => `
+                    <div class="p-3 bg-slate-800/40 rounded-lg border border-slate-800">
+                        <p class="text-xs font-semibold text-blue-400">${f.voterId || 'Anonymous Student'}</p>
+                        <p class="text-sm text-slate-200 mt-1">${f.message}</p>
+                    </div>
+                `).join('');
+            }
+        }
+
         function clearAllData() {
-            if (confirm('Are you sure you want to reset all voting and candidate data?')) {
+            if (confirm('Warning: This will clear all candidates, votes, schedules and feedback. Proceed?')) {
                 localStorage.clear();
-                loadCandidates();
-                alert('All data cleared successfully.');
+                loadDashboardData();
+                alert('All system data cleared.');
             }
         }
     </script>
