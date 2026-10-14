@@ -1,176 +1,782 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Admin Console - Avanthi E-Voting</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(15px); border: 1px solid rgba(244, 63, 94, 0.2); }
-    </style>
-</head>
-<body class="bg-slate-950 text-slate-100 p-6 font-sans min-h-screen flex flex-col justify-between">
-    <div class="max-w-3xl mx-auto w-full space-y-6 flex-grow">
-        
-        <!-- Auth Box -->
-        <div id="authBox" class="glass max-w-md mx-auto p-8 rounded-3xl mt-16 shadow-2xl border border-rose-500/30">
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 bg-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center mx-auto text-xl mb-2">
-                    <i class="fa-solid fa-user-shield"></i>
-                </div>
-                <h2 class="text-xl font-black text-white">Admin Authentication</h2>
-                <p class="text-xs text-slate-400">Avanthi E-Voting System Control</p>
-            </div>
-            <div class="space-y-4 text-xs">
-                <input type="text" id="admUser" placeholder="Username " class="w-full p-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white">
-                <input type="password" id="admPass" placeholder="Password " class="w-full p-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white">
-                <button onclick="loginAdmin()" class="w-full py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-black uppercase rounded-xl shadow-lg">LOGIN</button>
-                <div class="text-center pt-2"><a href="index.html" class="text-slate-500 hover:text-slate-300">← Back to Landing Page</a></div>
-            </div>
-        </div>
-
-        <!-- Dashboard -->
-        <div id="dashBox" class="hidden space-y-6 text-xs">
-            <div class="glass p-6 rounded-3xl flex justify-between items-center border border-slate-800">
-                <div>
-                    <h1 class="text-lg font-black text-white"><i class="fa-solid fa-gauge-high text-cyan-400 mr-2"></i> Admin Control Hub</h1>
-                    <p class="text-xs text-slate-400">Guide: Mrs. K. JYOTHI, B.Tech[span_22](start_span)[span_22](end_span)</p>
-                </div
-                <div class="space-x-2">
-                    <button onclick="localStorage.clear(); location.reload()" class="px-3 py-1.5 bg-rose-950 text-rose-400 border border-rose-800 rounded-xl font-bold">Reset / Wipe Data</button>
-                    <a href="index.html" class="px-3 py-1.5 bg-slate-800 rounded-xl font-bold text-slate-300">Home</a>
-                </div>
-            </div>
-
-            <!-- Stats Bar -->
-            <div class="grid grid-cols-3 gap-4 text-center">
-                <div class="glass p-4 rounded-2xl"><span class="text-[10px] text-slate-400 uppercase font-bold">Total Voters</span><h3 id="statUsers" class="text-xl font-black text-cyan-400">0</h3></div>
-                <div class="glass p-4 rounded-2xl"><span class="text-[10px] text-slate-400 uppercase font-bold">Votes Cast</span><h3 id="statVoted" class="text-xl font-black text-emerald-400">0</h3></div>
-                <div class="glass p-4 rounded-2xl"><span class="text-[10px] text-slate-400 uppercase font-bold">Turnout %</span><h3 id="statTurnout" class="text-xl font-black text-amber-400">0%</h3></div>
-            </div>
-
-            <!-- Election Time Config -->
-            <div class="glass p-6 rounded-3xl space-y-3">
-                <h2 class="font-black text-cyan-400 uppercase tracking-widest"><i class="fa-solid fa-clock mr-1"></i> Election Window Setup</h2>
-                <input type="text" id="eTitle" placeholder="Election Title" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
-                <input type="datetime-local" id="eTime" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
-                <button onclick="saveTime()" class="w-full py-2.5 bg-cyan-600 text-slate-950 font-black uppercase rounded-xl">Save Deadline</button>
-            </div>
-
-            <!-- Conduct Election: Add Candidate -->
-            <div class="glass p-6 rounded-3xl space-y-3">
-                <h2 class="font-black text-emerald-400 uppercase tracking-widest"><i class="fa-solid fa-user-plus mr-1"></i> Conduct Election: Add Candidates</h2>
-                <p class="text-[11px] text-slate-400">Note: If no candidates are added here, the student voting ballot will display <b>ONLY NOTA</b> by default.</p>
-                <div class="grid md:grid-cols-2 gap-3">
-                    <input type="text" id="cName" placeholder="Candidate Name (Ex: K. Jayanth)" class="p-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
-                    <input type="text" id="cParty" placeholder="Party Name" class="p-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
-                    <input type="text" id="cBranch" placeholder="Branch & Year (Ex: CSE 3rd Year)" class="p-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
-                    <div class="bg-slate-900 p-2.5 border border-slate-700 rounded-xl flex items-center justify-between">
-                        <span class="text-slate-400">Symbol:</span>
-                        <input type="file" id="cSymbol" accept="image/*" onchange="previewImg(event)" class="text-[11px] text-slate-300">
-                    </div>
-                </div>
-                <textarea id="cManifesto" placeholder="Manifesto Agenda..." rows="2" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white"></textarea>
-                <button onclick="addCandidate()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase rounded-xl">+ Publish Candidate to Voting Ballot</button>
-            </div>
-
-            <!-- Candidates List View -->
-            <div class="glass p-6 rounded-3xl space-y-3">
-                <h2 class="font-black text-blue-400 uppercase"><i class="fa-solid fa-list mr-1"></i> Active Contesting Candidates</h2>
-                <div id="candList" class="space-y-2"></div>
-            </div>
-
-            <!-- NOTA Feedback Inspector -->
-            <div class="glass p-6 rounded-3xl space-y-3">
-                <h2 class="font-black text-amber-400 uppercase"><i class="fa-solid fa-comments mr-1"></i> Student NOTA Grievances</h2>
-                <div id="feedbacks" class="space-y-2"></div>
-            </div>
-        </div>
-    </div>
-
-    <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-900">&copy; 2026 Avanthi E-Voting System</footer>
-
-    <script>
-        function loginAdmin() {
-            if(document.getElementById('admUser').value === "admin" && document.getElementById('admPass').value === "1234") {
-                document.getElementById('authBox').classList.add('hidden');
-                document.getElementById('dashBox').classList.remove('hidden');
-                loadAdminData();
-            } else { alert("Invalid Credentials! Use admin / 1234"); }
+        * {
+            box-sizing: border-box;
         }
 
-        let symbolBase64 = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-        function previewImg(e) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onloadend = () => symbolBase64 = reader.result;
-            if(file) reader.readAsDataURL(file);
+        body {
+            margin: 0;
+            background: #020617;
+            color: #f1f5f9;
+            font-family: Arial, sans-serif;
         }
 
-        function saveTime() {
-            const title = document.getElementById('eTitle').value;
-            const endTime = document.getElementById('eTime').value;
-            if(!title || !endTime) return alert("Fill Title and Time!");
-            localStorage.setItem('eTime', JSON.stringify({title, endTime}));
-            alert("Deadline Saved Successfully!");
+        .glass {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(244, 63, 94, 0.25);
+            border-radius: 24px;
         }
 
-        function addCandidate() {
-            const c = {
-                name: document.getElementById('cName').value,
-                party: document.getElementById('cParty').value,
-                branch: document.getElementById('cBranch').value,
-                manifesto: document.getElementById('cManifesto').value,
-                symbol: symbolBase64
-            };
-            if(!c.name || !c.party) return alert("Candidate Name & Party required!");
-            let list = JSON.parse(localStorage.getItem('cands')) || [];
-            list.push(c);
-            localStorage.setItem('cands', JSON.stringify(list));
-            document.getElementById('cName').value = ''; document.getElementById('cParty').value = ''; document.getElementById('cBranch').value = ''; document.getElementById('cManifesto').value = '';
-            alert("Candidate Published to Ballot!");
-            loadAdminData();
+        .hidden {
+            display: none !important;
         }
 
-        function delCand(idx) {
-            let list = JSON.parse(localStorage.getItem('cands')) || [];
-            list.splice(idx, 1);
-            localStorage.setItem('cands', JSON.stringify(list));
-            loadAdminData();
+        input,
+        textarea,
+        select {
+            width: 100%;
+            outline: none;
         }
 
-        function loadAdminData() {
-            let t = JSON.parse(localStorage.getItem('eTime'));
-            if(t) {
-                document.getElementById('eTitle').value = t.title;
-                document.getElementById('eTime').value = t.endTime;
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #22d3ee;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .message {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .candidate-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .candidate-symbol {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+            background: white;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .candidate-details {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px !important;
             }
 
-            const users = JSON.parse(localStorage.getItem('users')) || {};
-            const voted = JSON.parse(localStorage.getItem('voted')) || {};
-            const uCount = Object.keys(users).length;
-            const vCount = Object.keys(voted).length;
-            document.getElementById('statUsers').innerText = uCount;
-            document.getElementById('statVoted').innerText = vCount;
-            document.getElementById('statTurnout').innerText = uCount > 0 ? Math.round((vCount/uCount)*100) + "%" : "0%";
+            #authBox {
+                padding: 22px;
+                margin-top: 30px;
+            }
 
-            let candidates = JSON.parse(localStorage.getItem('cands')) || [];
-            document.getElementById('candList').innerHTML = candidates.map((c, idx) => `
-                <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center text-white">
-                    <div class="flex items-center gap-3">
-                        <img src="${c.symbol}" class="w-8 h-8 rounded bg-white object-cover">
-                        <div><b>${c.name}</b> (${c.party}) - <span class="text-slate-400">${c.branch}</span></div>
-                    </div>
-                    <button onclick="delCand(${idx})" class="text-rose-400 font-bold hover:underline">Remove</button>
-                </div>
-            `).join('') || "<p class='text-slate-500 italic'>No candidates conducted yet. By default ballot will show ONLY NOTA.</p>";
+            .candidate-row {
+                align-items: flex-start;
+            }
 
-            const fbs = JSON.parse(localStorage.getItem('fbs')) || [];
-            document.getElementById('feedbacks').innerHTML = fbs.map(f => 
-                `<div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center text-white"><span class="text-cyan-400 font-mono font-bold">${f.r}</span> <span class="text-slate-300 italic">"${f.t}"</span></div>`
-            ).join('') || "<p class='text-slate-500 italic'>No NOTA grievances recorded yet.</p>";
+            .candidate-symbol {
+                width: 34px;
+                height: 34px;
+            }
         }
-    </script>
-</body>
-</html>
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col p-6">
+
+    <main class="max-w-3xl mx-auto w-full flex-grow space-y-6">
+
+        <!-- ADMIN LOGIN -->
+
+        <section id="authBox"
+                 class="glass max-w-md mx-auto p-8 mt-12 shadow-2xl">
+
+            <div class="text-center mb-6">
+
+                <div class="w-14 h-14 bg-rose-500/20
+                            text-rose-400 rounded-2xl
+                            flex items-center justify-center
+                            mx-auto text-2xl mb-4">
+
+                    <i class="fa-solid fa-user-shield"></i>
+
+                </div>
+
+                <h1 class="text-2xl font-black text-white">
+                    Admin Authentication
+                </h1>
+
+                <p class="text-sm text-slate-400 mt-2">
+                    Avanthi E-Voting System Control
+                </p>
+
+            </div>
+
+            <form id="loginForm" class="space-y-4">
+
+                <input
+                    type="text"
+                    id="admUser"
+                    placeholder="Username"
+                    autocomplete="username"
+                    required
+                    class="p-4 bg-slate-900 border border-slate-700
+                           rounded-xl text-white"
+                >
+
+                <input
+                    type="password"
+                    id="admPass"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    required
+                    class="p-4 bg-slate-900 border border-slate-700
+                           rounded-xl text-white"
+                >
+
+                <button
+                    type="submit"
+                    class="w-full py-4 bg-rose-600 hover:bg-rose-500
+                           text-white font-black uppercase rounded-xl">
+
+                    LOGIN
+
+                </button>
+
+                <p id="loginMessage"
+                   role="status"
+                   class="message text-rose-400"></p>
+
+            </form>
+
+            <div class="text-center mt-6">
+
+                <a href="index.html"
+                   class="text-slate-400 hover:text-white">
+
+                    ← Back to Landing Page
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- ADMIN DASHBOARD -->
+
+        <section id="dashBox"
+                 class="hidden space-y-6">
+
+            <!-- HEADER -->
+
+            <div class="glass p-5 flex flex-wrap
+                        justify-between items-center gap-4">
+
+                <div>
+
+                    <h1 class="text-xl font-black text-white">
+
+                        <i class="fa-solid fa-gauge-high
+                                  text-cyan-400 mr-2"></i>
+
+                        Admin Control Hub
+
+                    </h1>
+
+                    <p class="text-sm text-slate-400 mt-2">
+
+                        Guide: Mrs. K. JYOTHI, B.Tech
+
+                    </p>
+
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+
+                    <a href="index.html"
+                       class="px-4 py-2 bg-slate-800
+                              rounded-xl text-sm">
+
+                        Home
+
+                    </a>
+
+                    <button
+                        type="button"
+                        id="logoutButton"
+                        class="px-4 py-2 bg-rose-700
+                               rounded-xl text-sm font-bold">
+
+                        Logout
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATISTICS -->
+
+            <div class="grid grid-cols-3 gap-3 text-center">
+
+                <div class="glass p-4">
+
+                    <p class="text-xs text-slate-400 font-bold">
+                        TOTAL VOTERS
+                    </p>
+
+                    <h2 id="statUsers"
+                        class="text-2xl font-black text-cyan-400">
+                        0
+                    </h2>
+
+                </div>
+
+                <div class="glass p-4">
+
+                    <p class="text-xs text-slate-400 font-bold">
+                        VOTES CAST
+                    </p>
+
+                    <h2 id="statVoted"
+                        class="text-2xl font-black text-emerald-400">
+                        0
+                    </h2>
+
+                </div>
+
+                <div class="glass p-4">
+
+                    <p class="text-xs text-slate-400 font-bold">
+                        TURNOUT
+                    </p>
+
+                    <h2 id="statTurnout"
+                        class="text-2xl font-black text-amber-400">
+                        0%
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <!-- ELECTION DEADLINE -->
+
+            <section class="glass p-6 space-y-4">
+
+                <h2 class="text-lg font-black
+                           text-cyan-400 uppercase">
+
+                    <i class="fa-solid fa-clock mr-2"></i>
+
+                    Election Window Setup
+
+                </h2>
+
+                <form id="timeForm" class="space-y-4">
+
+                    <input
+                        type="text"
+                        id="eTitle"
+                        placeholder="Election Title"
+                        required
+                        class="p-3 bg-slate-900 border
+                               border-slate-700 rounded-xl"
+                    >
+
+                    <label for="eTime"
+                           class="block text-sm text-slate-300">
+
+                        Election Deadline
+
+                    </label>
+
+                    <input
+                        type="datetime-local"
+                        id="eTime"
+                        required
+                        class="p-3 bg-slate-900 border
+                               border-slate-700 rounded-xl"
+                    >
+
+                    <button
+                        type="submit"
+                        class="w-full py-3 bg-cyan-600
+                               text-slate-950 font-black
+                               uppercase rounded-xl">
+
+                        Save Deadline
+
+                    </button>
+
+                    <p id="timeMessage"
+                       role="status"
+                       class="message text-cyan-300"></p>
+
+                </form>
+
+            </section>
+
+
+            <!-- ADD CANDIDATES -->
+
+            <section class="glass p-6 space-y-4">
+
+                <h2 class="text-lg font-black
+                           text-emerald-400 uppercase">
+
+                    <i class="fa-solid fa-user-plus mr-2"></i>
+
+                    Add Election Candidates
+
+                </h2>
+
+                <p class="text-sm text-slate-400">
+
+                    Add the candidate details below to prepare
+                    the voting ballot.
+
+                </p>
+
+                <form id="candidateForm" class="space-y-3">
+
+                    <input
+                        type="text"
+                        id="cName"
+                        placeholder="Candidate Name"
+                        required
+                        class="p-3 bg-slate-900 border
+                               border-slate-700 rounded-xl"
+                    >
+
+                    <input
+                        type="text"
+                        id="cParty"
+                        placeholder="Party Name"
+                        required
+                        class="p-3 bg-slate-900 border
+                               border-slate-700 rounded-xl"
+                    >
+
+                    <input
+                        type="text"
+                        id="cBranch"
+                        placeholder="Branch & Year"
+                        class="p-3 bg-slate-900 border
+                               border-slate-700 rounded-xl"
+                    >
+
+                    <label for="cSymbol"
+                           class="block text-sm text-slate-300">
+
+                        Candidate Symbol (optional)
+
+                    </label>
+
+                    <input
+                        type="file"
+                        id="cSymbol"
+                        accept="image/png,image/jpeg,image/webp,image/gif"
+                        class="p-3 bg-slate-900 border
+                               border-slate-700 rounded-xl"
+                    >
+
+                    <img
+                        id="symbolPreview"
+                        alt="Candidate symbol preview"
+                        class="hidden w-20 h-20 object-contain
+                               bg-white rounded-xl p-2"
+                    >
+
+                    <textarea
+                        id="cManifesto"
+                        placeholder="Candidate Manifesto"
+                        rows="3"
+                        class="p-3 bg-slate-900 border
+                               border-slate-700 rounded-xl"
+                    ></textarea>
+
+                    <button
+                        type="submit"
+                        class="w-full py-3 bg-emerald-600
+                               hover:bg-emerald-500 text-white
+                               font-black uppercase rounded-xl">
+
+                        + Publish Candidate
+
+                    </button>
+
+                    <p id="candidateMessage"
+                       role="status"
+                       class="message text-emerald-300"></p>
+
+                </form>
+
+            </section>
+
+
+            <!-- CANDIDATE LIST -->
+
+            <section class="glass p-6 space-y-4">
+
+                <h2 class="text-lg font-black
+                           text-blue-400 uppercase">
+
+                    <i class="fa-solid fa-list mr-2"></i>
+
+                    Active Candidates
+
+                </h2>
+
+                <div id="candList" class="space-y-3"></div>
+
+            </section>
+
+
+            <!-- NOTA FEEDBACK -->
+
+            <section class="glass p-6 space-y-4">
+
+                <h2 class="text-lg font-black
+                           text-amber-400 uppercase">
+
+                    <i class="fa-solid fa-comments mr-2"></i>
+
+                    Student NOTA Feedback
+
+                </h2>
+
+                <div id="feedbacks" class="space-y-3"></div>
+
+            </section>
+
+
+            <!-- DATA RESET -->
+
+            <section class="glass p-5 space-y-3">
+
+                <h2 class="text-lg font-bold text-rose-400">
+
+                    Data Management
+
+                </h2>
+
+                <p class="text-sm text-slate-400">
+
+                    Resetting project data can affect locally
+                    stored candidates, votes and voter records.
+                    Make a backup before deleting anything.
+
+                </p>
+
+                <button
+                    type="button"
+                    id="resetButton"
+                    class="w-full py-3 bg-rose-950
+                           border border-rose-700
+                           text-rose-300 font-bold rounded-xl">
+
+                    Reset Project Data
+
+                </button>
+
+            </section>
+
+        </section>
+
+    </main>
+
+
+    <footer class="text-center py-5 mt-8
+                   text-xs text-slate-500
+                   border-t border-slate-800">
+
+        &copy; 2026 Avanthi E-Voting System
+
+    </footer>
+
+
+    <script>
+
+        /*
+         * DEMONSTRATION LOGIN ONLY.
+         *
+         * Client-side credentials are visible to users
+         * who inspect the HTML or JavaScript.
+         *
+         * Use server-side authentication for a real system.
+         */
+
+        const DEMO_USERNAME = "admin";
+        const DEMO_PASSWORD = "1234";
+
+        const authBox = document.getElementById("authBox");
+        const dashBox = document.getElementById("dashBox");
+
+        const loginForm = document.getElementById("loginForm");
+
+        let symbolBase64 =
+            "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
+
+        // LOGIN
+
+        loginForm.addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            const username =
+                document.getElementById("admUser").value.trim();
+
+            const password =
+                document.getElementById("admPass").value;
+
+            const message =
+                document.getElementById("loginMessage");
+
+            if (
+                username === DEMO_USERNAME &&
+                password === DEMO_PASSWORD
+            ) {
+
+                message.textContent = "";
+
+                authBox.classList.add("hidden");
+                dashBox.classList.remove("hidden");
+
+                loadAdminData();
+
+            } else {
+
+                message.textContent =
+                    "Invalid username or password.";
+
+            }
+
+        });
+
+
+        // LOGOUT
+
+        document.getElementById("logoutButton")
+            .addEventListener("click", function() {
+
+                loginForm.reset();
+
+                dashBox.classList.add("hidden");
+                authBox.classList.remove("hidden");
+
+                document.getElementById("loginMessage")
+                    .textContent = "";
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+
+            });
+
+
+        // IMAGE PREVIEW
+
+        document.getElementById("cSymbol")
+            .addEventListener("change", function(event) {
+
+                const file = event.target.files[0];
+
+                if (!file) {
+                    return;
+                }
+
+                const preview =
+                    document.getElementById("symbolPreview");
+
+                if (!file.type.startsWith("image/")) {
+
+                    alert("Please select a valid image.");
+                    event.target.value = "";
+                    return;
+
+                }
+
+                if (file.size > 500 * 1024) {
+
+                    alert(
+                        "Please select an image smaller than 500 KB."
+                    );
+
+                    event.target.value = "";
+                    return;
+
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function() {
+
+                    symbolBase64 = reader.result;
+
+                    preview.src = symbolBase64;
+                    preview.classList.remove("hidden");
+
+                };
+
+                reader.readAsDataURL(file);
+
+            });
+
+
+        // SAVE ELECTION DEADLINE
+
+        document.getElementById("timeForm")
+            .addEventListener("submit", function(event) {
+
+                event.preventDefault();
+
+                const title =
+                    document.getElementById("eTitle")
+                        .value.trim();
+
+                const endTime =
+                    document.getElementById("eTime").value;
+
+                if (!title || !endTime) {
+
+                    alert("Please enter election title and deadline.");
+                    return;
+
+                }
+
+                const deadlineDate = new Date(endTime);
+
+                if (Number.isNaN(deadlineDate.getTime())) {
+
+                    alert("Please select a valid deadline.");
+                    return;
+
+                }
+
+                const election = {
+                    title: title,
+                    endTime: endTime
+                };
+
+                localStorage.setItem(
+                    "eTime",
+                    JSON.stringify(election)
+                );
+
+                document.getElementById("timeMessage")
+                    .textContent =
+                    "Election deadline saved in this browser.";
+
+            });
+
+
+        // ADD CANDIDATE
+
+        document.getElementById("candidateForm")
+            .addEventListener("submit", function(event) {
+
+                event.preventDefault();
+
+                const candidate = {
+
+                    name: document.getElementById("cName")
+                        .value.trim(),
+
+                    party: document.getElementById("cParty")
+                        .value.trim(),
+
+                    branch: document.getElementById("cBranch")
+                        .value.trim(),
+
+                    manifesto: document.getElementById("cManifesto")
+                        .value.trim(),
+
+                    symbol: symbolBase64
+
+                };
+
+                if (!candidate.name || !candidate.party) {
+
+                    alert("Candidate name and party are required.");
+                    return;
+
+                }
+
+                let candidates;
+
+                try {
+
+                    candidates =
+                        JSON.parse(localStorage.getItem("cands")) || [];
+
+                } catch (error) {
+
+                    candidates = [];
+
+                }
+
+                if (!Array.isArray(candidates)) {
+                    candidates = [];
+                }
+
+                candidates.push(candidate);
+
+                try {
+
+                    localStorage.setItem(
+                        "cands",
+                        JSON.stringify(candidates)
+                    );
+
+                } catch (error) {
+
+                    alert(
+                        "Storage limit reached. Try a smaller symbol image."
+                    );
+
+                    return;
+
+                }
+
+                document.getElementById("candidateForm").reset();
+
+                document.getElementById("symbolPreview")
+                    .classList.add("hidden");
+
+                symbolBase64 =
+                    "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
+                document.getElementById("candidateMessage")
+                    .textContent =
+           
