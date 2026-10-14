@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avanthi E-Voting System - Digital Campus Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(15px); border: 1px solid rgba(6, 182, 212, 0.2); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between font-sans">
+    
+    <!-- Navigation Bar -->
+    <nav class="glass sticky top-0 z-50 px-8 py-4 flex justify-between items-center border-b border-slate-800">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500 flex items-center justify-center font-black text-slate-950 text-lg shadow-lg">A</div>
+            <div>
+                <h1 class="font-bold text-sm tracking-wider">AVANTHI <span class="text-cyan-400">E-VOTING SYSTEM</span></h1>
+                <p class="text-[9px] text-slate-400">Secure Digital Campus Platform</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 text-xs font-bold">
+            <a href="login.html" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 rounded-xl transition shadow">Student Login</a>
+            <a href="admin.html" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-rose-400 rounded-xl border border-slate-700 transition">Admin Portal</a>
+            <a href="results.html" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-emerald-400 rounded-xl border border-slate-700 transition">Live Results</a>
+        </div>
+    </nav>
+
+    <!-- Main Hero & Website Overview Section -->
+    <main class="max-w-4xl mx-auto px-4 py-12 flex-grow space-y-10">
+        
+        <!-- Hero Card -->
+        <div class="glass p-10 rounded-3xl text-center space-y-6 shadow-2xl border border-cyan-500/30">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 text-cyan-400 rounded-full text-xs font-bold border border-cyan-500/20">
+                <i class="fa-solid fa-circle-check"></i> Next-Gen Advance Pro Max Web Application
+            </div>
+            <h2 class="text-4xl font-black text-white tracking-tight">Modernizing Campus Elections with Absolute Transparency</h2>
+            <p class="text-xs text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                Avanthi E-Voting System is a high-security, paperless web portal built to conduct seamless student elections. Featuring biometric fingerprint simulation, EVM audio-visual feedback, and time-locked cryptographic receipts.
+            </p>
+            
+            <!-- Properly Formatted Action Buttons -->
+            <div class="pt-2 flex flex-wrap gap-4 justify-center text-xs">
+                <a href="login.html" class="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black uppercase tracking-wider rounded-xl shadow-lg hover:opacity-90 transition flex items-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login to Vote
+                </a>
+                <a href="register.html" class="px-8 py-4 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-cyan-400 font-bold uppercase rounded-xl transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Register Roll No
+                </a>
+                <a href="results.html" class="px-8 py-4 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-emerald-400 font-bold uppercase rounded-xl transition flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie"></i> View Live Analytics
+                </a>
+            </div>
+        </div>
+
+        <!-- Website Modules Grid -->
+        <div class="grid md:grid-cols-3 gap-6 text-xs">
+            <div class="glass p-6 rounded-2xl space-y-3 border-t-4 border-cyan-500">
+                <div class="w-10 h-10 bg-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center text-base">
+                    <i class="fa-solid fa-id-card"></i>
+                </div>
+                <h3 class="font-bold text-white text-sm">Secure Authentication</h3>
+                <p class="text-slate-400 text-[11px] leading-relaxed">
+                    Institutional roll number validation matching branch formats with secure password encryption and session isolation.
+                </p>
+            </div>
+
+            <div class="glass p-6 rounded-2xl space-y-3 border-t-4 border-emerald-500">
+                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center text-base">
+                    <i class="fa-solid fa-fingerprint"></i>
+                </div>
+                <h3 class="font-bold text-white text-sm">Biometric & EVM Ballot</h3>
+                <p class="text-slate-400 text-[11px] leading-relaxed">
+                    Realistic voting machine experience featuring candidate manifestos, audio beeps, LED indicators, and phone fingerprint security.
+                </p>
+            </div>
+
+            <div class="glass p-6 rounded-2xl space-y-3 border-t-4 border-amber-500">
+                <div class="w-10 h-10 bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center text-base">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <h3 class="font-bold text-white text-sm">Cryptographic Receipts</h3>
+                <p class="text-slate-400 text-[11px] leading-relaxed">
+                    Every vote generates a unique transaction hash (`TXN-AVN-XXXX`) allowing students to securely verify their ballot status.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-900">&copy; 2026 Avanthi E-Voting System &bull; Designed for Campus Democracy</footer>
+
+</body>
+</html>
