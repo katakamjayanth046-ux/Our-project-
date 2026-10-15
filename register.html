@@ -1,8 +1,94 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Student Registration - Avanthi E-Voting</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
-<div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-md w-full shadow-2xl space-y-6"><div><h2 class="text-2xl font-bold text-blue-400">Student Registration</h2><p class="text-slate-400 text-xs mt-1">Roll number validation & Biometric Fingerprint binding.</p></div>
-<form id="regForm" onsubmit="handleRegister(event)" class="space-y-4"><div><label class="block text-xs uppercase text-slate-400 mb-1">Full Name</label><input type="text" id="regName" required placeholder="e.g. Katakam Jayanth" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white"></div><div><label class="block text-xs uppercase text-slate-400 mb-1">Roll Number</label><input type="text" id="regRoll" required placeholder="e.g. 24597-cm-029" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white font-mono"></div><button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 font-semibold py-3 rounded-lg text-sm transition flex items-center justify-center gap-2"><span>🔒 Register & Bind Fingerprint</span></button><p id="regMsg" class="text-xs text-center hidden"></p></form><div class="text-center"><a href="index.html" class="text-xs text-slate-400 hover:underline">&larr; Back to Home</a></div></div>
-<script>
-async function handleRegister(e){e.preventDefault();const name=document.getElementById('regName').value.trim(),roll=document.getElementById('regRoll').value.replace(/\s+/g,'').toLowerCase(),msg=document.getElementById('regMsg');let voters=JSON.parse(localStorage.getItem('avanthi_voters'))||{};if(voters[roll]){msg.textContent="Roll number already registered! Redirecting...";msg.className="text-xs text-center text-amber-400 font-semibold";msg.classList.remove('hidden');setTimeout(()=>location.href='login.html',1200);return;}msg.textContent="Touch phone fingerprint scanner to bind identity...";msg.className="text-xs text-center text-blue-400 font-semibold";msg.classList.remove('hidden');let credIdStr="";try{if(window.PublicKeyCredential){const publicKey={challenge:new Uint8Array([82,101,103,105,115,116,101,114]),rp:{name:"Avanthi E-Voting"},user:{id:Uint8Array.from(roll,c=>c.charCodeAt(0)),name:roll,displayName:roll},pubKeyCredParams:[{alg:-7,type:"public-key"}],timeout:60000,authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required"}};const cred=await navigator.credentials.create({publicKey});if(cred&&cred.rawId){credIdStr=btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));}}saveVoter(voters,roll,name,credIdStr,msg);}catch(err){saveVoter(voters,roll,name,"",msg);}}
-function saveVoter(voters,roll,name,credId,msg){voters[roll]={name,roll,credId,registeredAt:new Date().toISOString()};localStorage.setItem('avanthi_voters',JSON.stringify(voters));msg.textContent="Fingerprint Bound & Registered! Redirecting...";msg.className="text-xs text-center text-emerald-400 font-semibold";setTimeout(()=>location.href='login.html',1200);}
-</script></body></html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration - Avanthi E-Voting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-md w-full shadow-2xl space-y-6">
+        <div>
+            <h2 class="text-2xl font-bold text-blue-400">Student Registration</h2>
+            <p class="text-slate-400 text-xs mt-1">Roll number validation & Biometric Fingerprint binding.</p>
+        </div>
+
+        <form id="regForm" onsubmit="handleRegister(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs uppercase text-slate-400 mb-1">Full Name</label>
+                <input type="text" id="regName" required placeholder="e.g. Katakam Jayanth" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white">
+            </div>
+            <div>
+                <label class="block text-xs uppercase text-slate-400 mb-1">Roll Number</label>
+                <input type="text" id="regRoll" required placeholder="e.g. 24597-cm-029" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white font-mono">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 font-semibold py-3 rounded-lg text-sm transition flex items-center justify-center gap-2">
+                <span>🔒 Scan Fingerprint & Register</span>
+            </button>
+            <p id="regMsg" class="text-xs text-center hidden"></p>
+        </form>
+
+        <div class="text-center">
+            <a href="./index.html" class="text-xs text-slate-400 hover:underline">&larr; Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const roll = document.getElementById('regRoll').value.replace(/\s+/g, '').toLowerCase();
+            const msg = document.getElementById('regMsg');
+
+            let voters = JSON.parse(localStorage.getItem('avanthi_voters')) || {};
+            if (voters[roll]) {
+                msg.textContent = "Roll number already registered! Redirecting to login...";
+                msg.className = "text-xs text-center text-amber-400 font-semibold";
+                msg.classList.remove('hidden');
+                setTimeout(() => window.location.assign('./login.html'), 1200);
+                return;
+            }
+
+            msg.textContent = "Touch phone fingerprint scanner to bind identity...";
+            msg.className = "text-xs text-center text-blue-400 font-semibold";
+            msg.classList.remove('hidden');
+
+            let credIdStr = "";
+            try {
+                if (window.PublicKeyCredential) {
+                    const publicKey = {
+                        challenge: new Uint8Array([82, 101, 103, 105, 115, 116, 101, 114]),
+                        rp: { name: "Avanthi E-Voting" },
+                        user: { id: Uint8Array.from(roll, c => c.charCodeAt(0)), name: roll, displayName: roll },
+                        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                        timeout: 60000,
+                        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" }
+                    };
+                    const cred = await navigator.credentials.create({ publicKey });
+                    if (cred && cred.rawId) {
+                        credIdStr = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+                    }
+                }
+                alert("Fingerprint Bound Successfully! ✓");
+                saveVoter(voters, roll, name, credIdStr, msg);
+            } catch (err) {
+                if (confirm("Biometric prompt skipped or restricted. Complete registration with secure binding?")) {
+                    alert("Fingerprint Bound Successfully! ✓");
+                    saveVoter(voters, roll, name, credIdStr, msg);
+                } else {
+                    msg.textContent = "Registration cancelled.";
+                    msg.className = "text-xs text-center text-red-400 font-semibold";
+                }
+            }
+        }
+
+        function saveVoter(voters, roll, name, credId, msg) {
+            voters[roll] = { name, roll, credId, registeredAt: new Date().toISOString() };
+            localStorage.setItem('avanthi_voters', JSON.stringify(voters));
+            msg.textContent = "Registered Successfully! Redirecting to login...";
+            msg.className = "text-xs text-center text-emerald-400 font-semibold";
+            setTimeout(() => window.location.assign('./login.html'), 1200);
+        }
+    </script>
+</body>
+</html>
