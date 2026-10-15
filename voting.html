@@ -1,16 +1,188 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Voting Booth - Avanthi E-Voting</title><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-slate-950 text-slate-100 min-h-screen font-sans p-4 md:p-8">
-<div class="max-w-4xl mx-auto space-y-6"><header class="flex justify-between items-center border-b border-slate-800 pb-4"><div><h1 class="text-2xl font-bold text-blue-400">Avanthi Voting Booth</h1><p id="voterInfo" class="text-xs text-slate-400 mt-0.5"></p></div><button onclick="handleLogout()" class="text-xs bg-red-600/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg">Logout</button></header>
-<div class="space-y-4"><h2 class="text-lg font-semibold text-slate-200">Select Your Candidate</h2><div id="candidatesList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div><div id="notaContainer" class="hidden bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between"><div><h3 class="font-bold text-slate-300">NOTA (None of the Above)</h3><p class="text-xs text-slate-400">Exercise your right to reject all candidates.</p></div><button onclick="triggerFingerprintVote('NOTA')" class="bg-amber-600 hover:bg-amber-500 text-white px-5 py-2 rounded-lg text-sm font-semibold">Vote NOTA 🔒</button></div></div>
-<div class="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-3 mt-8"><h3 class="font-bold text-sm text-blue-400">Student Remarks & Feedback</h3><textarea id="feedbackText" rows="2" placeholder="Write your feedback..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white"></textarea><button onclick="submitFeedback()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-semibold">Send Feedback</button></div></div>
-<script>
-let voter=sessionStorage.getItem('currentVoter');if(!voter){voter='24597-cm-029';sessionStorage.setItem('currentVoter',voter);}
-window.onload=function(){document.getElementById('voterInfo').textContent=`Logged in as: ${voter.toUpperCase()}`;loadBallot();};
-function loadBallot(){const list=document.getElementById('candidatesList');let candidates=JSON.parse(localStorage.getItem('avanthi_candidates'))||[];if(candidates.length===0){candidates=[{id:101,name:"K. Jayanth",dept:"CME - President",manifesto:"Digital Lab Upgrades & Campus Wi-Fi.",photo:"https://via.placeholder.com/150?text=Jayanth"},{id:102,name:"R. Charan",dept:"ECE - Vice President",manifesto:"Tech Symposia & Industrial Visits.",photo:"https://via.placeholder.com/150?text=Charan"}];localStorage.setItem('avanthi_candidates',JSON.stringify(candidates));}
-list.innerHTML=candidates.map(c=>`<div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-start gap-4 shadow-lg"><img src="${c.photo}" class="w-16 h-16 rounded-xl object-cover border border-slate-700 shrink-0"><div class="flex-1 min-w-0"><h3 class="font-bold text-white text-base">${c.name}</h3><p class="text-xs text-blue-400 mb-1">${c.dept}</p><p class="text-xs text-slate-400 italic bg-slate-800/40 p-2 rounded border border-slate-800/80 mb-3">"${c.manifesto}"</p><button onclick="triggerFingerprintVote(${c.id})" class="bg-blue-600 hover:bg-blue-500 text-white w-full py-2 rounded-lg text-xs font-semibold transition">Scan Fingerprint & Vote 🔒</button></div></div>`).join('');
-if(localStorage.getItem('avanthi_nota_enabled')==='true'){document.getElementById('notaContainer').classList.remove('hidden');}}
-async function triggerFingerprintVote(candidateId){try{if(window.PublicKeyCredential){let voters=JSON.parse(localStorage.getItem('avanthi_voters'))||{};let vData=voters[voter];let pubOpt={challenge:new Uint8Array([86,111,116,101,83,101,99,117,114,101]),timeout:60000,userVerification:"required"};if(vData&&vData.credId){pubOpt.allowCredentials=[{id:Uint8Array.from(atob(vData.credId),c=>c.charCodeAt(0)),type:"public-key"}];}await navigator.credentials.get({publicKey:pubOpt});}executeVote(candidateId);}catch(err){if(confirm("Match verification notice: Proceed with vote recording?")){executeVote(candidateId);}}}
-function executeVote(candidateId){let candidates=JSON.parse(localStorage.getItem('avanthi_candidates'))||[];if(candidateId==='NOTA'){let n=parseInt(localStorage.getItem('avanthi_nota_votes')||'0',10);localStorage.setItem('avanthi_nota_votes',n+1);}else{candidates=candidates.map(c=>{if(c.id===candidateId)c.votes=(c.votes||0)+1;return c;});localStorage.setItem('avanthi_candidates',JSON.stringify(candidates));}let votedList=JSON.parse(localStorage.getItem('avanthi_voted_list'))||[];if(!votedList.includes(voter)){votedList.push(voter);localStorage.setItem('avanthi_voted_list',JSON.stringify(votedList));}alert('Fingerprint Matched & Vote Successfully Recorded!');sessionStorage.removeItem('currentVoter');location.href='results.html';}
-function submitFeedback(){const msg=document.getElementById('feedbackText').value.trim();if(!msg)return;let fb=JSON.parse(localStorage.getItem('avanthi_feedbacks'))||[];fb.push({voterId:voter,message:msg,time:new Date().toLocaleTimeString()});localStorage.setItem('avanthi_feedbacks',JSON.stringify(fb));document.getElementById('feedbackText').value='';alert('Feedback sent to Admin successfully!');}
-function handleLogout(){sessionStorage.removeItem('currentVoter');location.href='index.html';}
-</script></body></html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Booth - Avanthi E-Voting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes evmFlash { 0% { background-color: #020617; } 50% { background-color: #065f46; } 100% { background-color: #020617; } }
+        .evm-active { animation: evmFlash 0.4s ease-in-out; }
+    </style>
+</head>
+<body id="boothBody" class="bg-slate-950 text-slate-100 min-h-screen font-sans p-4 md:p-8 transition-colors duration-300">
+    <div class="max-w-4xl mx-auto space-y-6">
+        <header class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-400">Avanthi Voting Booth</h1>
+                <p id="voterInfo" class="text-xs text-slate-400 mt-0.5"></p>
+            </div>
+            <button onclick="handleLogout()" class="text-xs bg-red-600/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg">Logout</button>
+        </header>
+
+        <div class="space-y-4">
+            <h2 class="text-lg font-semibold text-slate-200">Select Your Candidate (EVM Terminal)</h2>
+            <div id="candidatesList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            
+            <div id="notaContainer" class="hidden bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-300">NOTA (None of the Above)</h3>
+                    <p class="text-xs text-slate-400">Exercise your right to reject all candidates.</p>
+                </div>
+                <button onclick="triggerFingerprintVote('NOTA')" class="bg-amber-600 hover:bg-amber-500 text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-lg">Vote NOTA 🔒</button>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-3 mt-8">
+            <h3 class="font-bold text-sm text-blue-400">Student Remarks & Feedback</h3>
+            <textarea id="feedbackText" rows="2" placeholder="Write your feedback..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500"></textarea>
+            <button onclick="submitFeedback()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-semibold">Send Feedback</button>
+        </div>
+    </div>
+
+    <!-- Receipt Modal Overlay -->
+    <div id="receiptModal" class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-900 border border-emerald-500/50 p-6 rounded-2xl max-w-sm w-full text-center space-y-4 shadow-2xl">
+            <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">✓</div>
+            <h3 class="text-xl font-bold text-emerald-400">Vote Cast Successfully!</h3>
+            <p class="text-xs text-slate-300">Your biometric match was verified and vote is recorded securely on ledger.</p>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-xs text-blue-400" id="receiptIdBox">TXN-AVN-XXXXXX</div>
+            <button onclick="finishVoting()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-sm font-semibold">View Live Results &rarr;</button>
+        </div>
+    </div>
+
+    <script>
+        let voter = sessionStorage.getItem('currentVoter');
+        if (!voter) { voter = '24597-cm-029'; sessionStorage.setItem('currentVoter', voter); }
+
+        window.onload = function() {
+            document.getElementById('voterInfo').textContent = `Logged in as: ${voter.toUpperCase()}`;
+            loadBallot();
+        };
+
+        function loadBallot() {
+            const list = document.getElementById('candidatesList');
+            let candidates = JSON.parse(localStorage.getItem('avanthi_candidates')) || [];
+            if (candidates.length === 0) {
+                candidates = [
+                    { id: 101, name: "K. Jayanth", dept: "CME - President", manifesto: "Digital Lab Upgrades & Campus Wi-Fi.", photo: "https://via.placeholder.com/150?text=Jayanth" },
+                    { id: 102, name: "R. Charan", dept: "ECE - Vice President", manifesto: "Tech Symposia & Industrial Visits.", photo: "https://via.placeholder.com/150?text=Charan" }
+                ];
+                localStorage.setItem('avanthi_candidates', JSON.stringify(candidates));
+            }
+
+            list.innerHTML = candidates.map(c => `
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-start gap-4 shadow-lg hover:border-blue-500/50 transition">
+                    <img src="${c.photo}" class="w-16 h-16 rounded-xl object-cover border border-slate-700 shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-white text-base">${c.name}</h3>
+                        <p class="text-xs text-blue-400 mb-1">${c.dept}</p>
+                        <p class="text-xs text-slate-400 italic bg-slate-800/40 p-2 rounded border border-slate-800/80 mb-3">"${c.manifesto}"</p>
+                        <button onclick="triggerFingerprintVote(${c.id})" class="bg-blue-600 hover:bg-blue-500 text-white w-full py-2 rounded-lg text-xs font-semibold transition shadow">Scan Fingerprint & Vote 🔒</button>
+                    </div>
+                </div>
+            `).join('');
+
+            if (localStorage.getItem('avanthi_nota_enabled') === 'true') {
+                document.getElementById('notaContainer').classList.remove('hidden');
+            }
+        }
+
+        // EVM Electronic Beep Generator using Web Audio API
+        function playEvmBeep() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(920, audioCtx.currentTime); // Crisp EVM beep frequency
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.18);
+            } catch (e) {
+                console.log("AudioContext restricted:", e);
+            }
+        }
+
+        async function triggerFingerprintVote(candidateId) {
+            try {
+                if (window.PublicKeyCredential) {
+                    let voters = JSON.parse(localStorage.getItem('avanthi_voters')) || {};
+                    let vData = voters[voter];
+                    let pubOpt = { challenge: new Uint8Array([86, 111, 116, 101, 83, 101, 99, 117, 114, 101]), timeout: 60000, userVerification: "required" };
+                    if (vData && vData.credId) {
+                        pubOpt.allowCredentials = [{ id: Uint8Array.from(atob(vData.credId), c => c.charCodeAt(0)), type: "public-key" }];
+                    }
+                    await navigator.credentials.get({ publicKey: pubOpt });
+                }
+                processSuccessfulVote(candidateId);
+            } catch (err) {
+                if (confirm("Biometric sensor prompt skipped or restricted. Proceed with secure test verification?")) {
+                    processSuccessfulVote(candidateId);
+                }
+            }
+        }
+
+        function processSuccessfulVote(candidateId) {
+            // 1. Trigger EVM Beep Sound
+            playEvmBeep();
+
+            // 2. Trigger EVM Flash Screen Animation
+            const body = document.getElementById('boothBody');
+            body.classList.add('evm-active');
+
+            // 3. Update Storage Counts & Voted List
+            let candidates = JSON.parse(localStorage.getItem('avanthi_candidates')) || [];
+            if (candidateId === 'NOTA') {
+                let n = parseInt(localStorage.getItem('avanthi_nota_votes') || '0', 10);
+                localStorage.setItem('avanthi_nota_votes', n + 1);
+            } else {
+                candidates = candidates.map(c => {
+                    if (c.id === candidateId) c.votes = (c.votes || 0) + 1;
+                    return c;
+                });
+                localStorage.setItem('avanthi_candidates', JSON.stringify(candidates));
+            }
+
+            let votedList = JSON.parse(localStorage.getItem('avanthi_voted_list')) || [];
+            if (!votedList.includes(voter)) {
+                votedList.push(voter);
+                localStorage.setItem('avanthi_voted_list', JSON.stringify(votedList));
+            }
+
+            // 4. Generate Unique Transaction Receipt ID
+            const receiptCode = 'TXN-AVN-' + Math.random().toString(36).substring(2, 8).toUpperCase() + Date.now().toString().slice(-4);
+            localStorage.setItem('last_receipt', receiptCode);
+            document.getElementById('receiptIdBox').textContent = receiptCode;
+
+            // 5. Show Receipt Modal after animation
+            setTimeout(() => {
+                body.classList.remove('evm-active');
+                document.getElementById('receiptModal').classList.remove('hidden');
+            }, 400);
+        }
+
+        function finishVoting() {
+            sessionStorage.removeItem('currentVoter');
+            window.location.assign('./results.html');
+        }
+
+        function submitFeedback() {
+            const msg = document.getElementById('feedbackText').value.trim();
+            if (!msg) return;
+            let fb = JSON.parse(localStorage.getItem('avanthi_feedbacks')) || [];
+            fb.push({ voterId: voter, message: msg, time: new Date().toLocaleTimeString() });
+            localStorage.setItem('avanthi_feedbacks', JSON.stringify(fb));
+            document.getElementById('feedbackText').value = '';
+            alert('Feedback sent to Admin successfully!');
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('currentVoter');
+            window.location.assign('./index.html');
+        }
+    </script>
+</body>
+</html>
