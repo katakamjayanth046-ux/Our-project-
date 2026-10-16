@@ -16,7 +16,7 @@
             <a href="./index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300">Home</a>
         </header>
 
-        <!-- Official Winner Announcement Banner -->
+        <!-- Official Winner Announcement Banner (Only shows when time expires or admin closes election) -->
         <div id="winnerBanner" class="hidden bg-gradient-to-r from-emerald-900/50 to-blue-900/50 border border-emerald-500/50 p-6 rounded-2xl shadow-xl text-center space-y-2">
             <span class="bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Official Winner Announcement</span>
             <h2 id="winnerText" class="text-2xl font-extrabold text-white"></h2>
@@ -107,30 +107,28 @@
 
         function checkElectionStatus() {
             const endTimeStr = localStorage.getItem('avanthi_end_time');
+            const electionStatus = localStorage.getItem('avanthi_election_status'); // 'closed' or active
             const now = new Date();
-            let isEnded = false;
+            let isTimeExpired = false;
 
             if (endTimeStr) {
                 const endTime = new Date(endTimeStr);
-                if (now >= endTime) isEnded = true;
+                if (now >= endTime) isTimeExpired = true;
             }
 
-            let candidates = JSON.parse(localStorage.getItem('avanthi_candidates')) || [];
-            if (candidates.length > 0 && (isEnded || totalVotesCast() > 0)) {
-                candidates.sort((a, b) => (b.votes || 0) - (a.votes || 0));
-                const winner = candidates[0];
-                if (winner && (winner.votes || 0) > 0) {
-                    document.getElementById('winnerBanner').classList.remove('hidden');
-                    document.getElementById('winnerText').textContent = `🎉 Winner: ${winner.name} (${winner.dept})`;
-                    document.getElementById('winnerSubText').textContent = `Secured majority with ${winner.votes} votes! Official election results declared.`;
+            // Winner announcement only if time expired OR admin closed election explicitly
+            if (isTimeExpired || electionStatus === 'closed') {
+                let candidates = JSON.parse(localStorage.getItem('avanthi_candidates')) || [];
+                if (candidates.length > 0) {
+                    candidates.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+                    const winner = candidates[0];
+                    if (winner) {
+                        document.getElementById('winnerBanner').classList.remove('hidden');
+                        document.getElementById('winnerText').textContent = `🎉 Winner: ${winner.name} (${winner.dept})`;
+                        document.getElementById('winnerSubText').textContent = `Secured majority with ${winner.votes} votes! Official election time completed and results declared.`;
+                    }
                 }
             }
-        }
-
-        function totalVotesCast() {
-            let candidates = JSON.parse(localStorage.getItem('avanthi_candidates')) || [];
-            let nota = parseInt(localStorage.getItem('avanthi_nota_votes') || '0', 10);
-            return nota + candidates.reduce((sum, c) => sum + (c.votes || 0), 0);
         }
     </script>
 </body>
